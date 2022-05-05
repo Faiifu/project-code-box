@@ -14,6 +14,7 @@ if ($p->post_count == 1) {
     $new_post_arr = array(
         'post_title'    => 'Branch of '.$box_title,
         'post_status'   => 'publish',
+        'post_parent'   => $box_id,
         'post_type'     => $branch_type
     );  
     $new_post = wp_insert_post($new_post_arr);
@@ -21,7 +22,8 @@ if ($p->post_count == 1) {
     update_field('parent',$box_id,$new_post);
     wp_update_post(array(
         'ID'            => $new_post,
-        'post_name'     => $box_id.'-'.$new_post
+        'post_name'     => $box_id.'-'.$new_post,
+        'post_title'    => 'Branch '.$new_post.' of '.$box_title,
     ));
     
     $branch_url = get_permalink($new_post);

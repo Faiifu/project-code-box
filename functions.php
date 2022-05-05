@@ -216,3 +216,32 @@ function isMod($course_id){
 	}
 	return $is;
 }
+
+function get_user_branch($parent_id,$uid = null){
+	if ($uid == null) {
+		$uid = get_current_user_id();
+	}
+	$parent_type = get_post_type($parent_id);
+	$branch_type = $parent_type.'-branch';
+	$av_type = ['code','lesson','exercise'];
+	if (in_array($parent_type,$av_type)) {
+		$args = array(
+			// 'post_parent' => $parent_id,
+			'meta_key'		=> 'parent',
+			'meta_value'	=> $parent_id,
+			'post_type' => $branch_type,
+			'post_author' => $uid,
+
+		);
+		$p = new WP_Query($args);
+		if ($p->post_count == 1) {
+			$b = $p->post;
+			return $b;
+		}else{
+			return null;
+		}
+	}else{
+		return null;
+	}
+	
+}

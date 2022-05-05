@@ -1003,6 +1003,7 @@ body.admin-bar #for_dev {
 	top: 32px;
 }
 .pre-title {
+	color: #ffeb3b;
     display: inline-block;
     position: relative;
     top: 0px;

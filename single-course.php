@@ -1,45 +1,51 @@
 <?php
 $is_admin = isAdmin();
 $is_mod = isMod(get_the_ID());
-if ($is_mod) {
-	if ($_POST['form'] == 'new_unit') {
-		$row = array(
-			'title' => $_POST['title'],
-			'status'   => 'hidden',
-			'box' => array()
-		);
-		add_row('units', $row, get_the_ID());
-	}
-	if ($_POST['new_box'] == 'lesson' OR $_POST['new_box'] == 'exercise') {
-		$i = $_POST['ui'];
-		$new_post_arr = array(
-			'post_title'    => $text,
-			'post_status'   => 'publish',
-			'post_type' 	=> $_POST['new_box'],
-			'post_parent'	=> get_the_ID(),
-		);	
-		$new_post = wp_insert_post( $new_post_arr );
-		wp_update_post(array(
-			'ID'           => $new_post,
-			'post_title'    => ucfirst($_POST['new_box']).': '.$new_post,
-		));
-		update_field('in_course',get_the_ID(),$new_post);
-		$temp_u = get_field('units');
-		$temp_b = $temp_u[$i]['box'];
-		array_push($temp_b,$new_post);
-		$row = array(
-			'box'  => $temp_b
-		);
-		update_row('units', $i+1, $row);	
-	}
-	if ($_POST['form'] == 'edit_unit') {
-		$i = $_POST['ui'];
-		$row = array(
-			'title'  => $_POST['title'],
-			'status'   => $_POST['status']
-		);
-		update_row('units', $i+1, $row);	
+if (is_user_logged_in()) {
+	$uid = get_current_user_id();
+	if ($is_mod) {
+		if ($_POST['form'] == 'new_unit') {
+			$row = array(
+				'title' => $_POST['title'],
+				'status'   => 'hidden',
+				'box' => array()
+			);
+			add_row('units', $row, get_the_ID());
+		}
+		if ($_POST['new_box'] == 'lesson' OR $_POST['new_box'] == 'exercise') {
+			$i = $_POST['ui'];
+			$new_post_arr = array(
+				'post_title'    => $text,
+				'post_status'   => 'publish',
+				'post_type' 	=> $_POST['new_box'],
+				'post_parent'	=> get_the_ID(),
+			);	
+			$new_post = wp_insert_post( $new_post_arr );
+			wp_update_post(array(
+				'ID'           => $new_post,
+				'post_title'    => ucfirst($_POST['new_box']).': '.$new_post,
+			));
+			update_field('in_course',get_the_ID(),$new_post);
+			if ($_POST['new_box'] == 'exercise') {
+				update_field('score',10,$new_post);
+			}
+			$temp_u = get_field('units');
+			$temp_b = $temp_u[$i]['box'];
+			array_push($temp_b,$new_post);
+			$row = array(
+				'box'  => $temp_b
+			);
+			update_row('units', $i+1, $row);	
+		}
+		if ($_POST['form'] == 'edit_unit') {
+			$i = $_POST['ui'];
+			$row = array(
+				'title'  => $_POST['title'],
+				'status'   => $_POST['status']
+			);
+			update_row('units', $i+1, $row);	
 		// die();
+		}
 	}
 }
 $f = get_fields();
@@ -225,6 +231,7 @@ $fi = get_the_post_thumbnail_url();
 									$cl = 'violet';
 								}
 								$cl_bdt = $cl;
+								$branch = get_user_branch($b->ID,$uid);
 								?>
 								<div class="unit-box unit-box-<?=$box_type?>   mt-4 bg-slate-100 border-t-4 border-<?=$cl_bdt?>-300">
 									<div class="unit-box-icon  p-4 border-r-2 border-slate-200 text-<?=$cl?>-600">
@@ -236,17 +243,19 @@ $fi = get_the_post_thumbnail_url();
 											$fb = get_fields($b->ID);
 											?>
 											<div class="text-slate-500">
-												หมดเขตส่ง  <?=$fb['due_date']?><br>
-												คะแนนเต็ม <?=$fb['score']?> คะแนน
+												หมดเขตส่ง  <b class="text-slate-600"><?=$fb['due_date']?></b><br>
+												คะแนนเต็ม <b class="text-slate-600"><?=$fb['score']?> คะแนน</b>
 											</div>
 										<?php endif ?>
 										<div class="mt-4 mb-4 font-bold">
 											<a href="<?=get_the_permalink($b->ID)?>" target="_blank">
 												<span class="rounded-md border-slate-200 px-3 py-2 text-sm mr-2 bg-<?=$cl?>-600 hover:bg-<?=$cl?>-700 border-2 border-<?=$cl?>-600 hover:border-<?=$cl?>-700  text-white">View Code</span>
 											</a>
-											<a href="<?=get_the_permalink($b->ID)?>" target="_blank">
+											<?php if ($branch != null): ?>
+												<a href="<?=get_the_permalink($branch->ID)?>" target="_blank">
 												<span  class="rounded-md border-2 border-<?=$cl?>-400 px-3 py-2 text-sm mr-2 hover:border-<?=$cl?>-700 text-<?=$cl?>-400 hover:text-<?=$cl?>-700">View Your Branch</span>
 											</a>
+											<?php endif ?>
 										</div>
 									</div>
 								</div>
